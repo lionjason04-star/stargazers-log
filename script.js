@@ -17,12 +17,22 @@ function getFallbackRepositories() {
   }
 }
 
-function validateRepositories(data) {
-  if (!Array.isArray(data)) {
-    throw new Error("Repository data must be an array.");
+function normalizeRepositories(data) {
+  if (Array.isArray(data)) {
+    return data;
   }
 
-  return data.filter((repository) => {
+  if (data && Array.isArray(data.repositories)) {
+    return data.repositories;
+  }
+
+  return [];
+}
+
+function validateRepositories(data) {
+  const repositories = normalizeRepositories(data);
+
+  return repositories.filter((repository) => {
     if (!repository || typeof repository !== "object") {
       return false;
     }
@@ -35,6 +45,7 @@ function validateRepositories(data) {
     } catch {
       return false;
     }
+
     const validDate = !Number.isNaN(new Date(repository.starredAt).getTime());
 
     return typeof repository.name === "string" && repository.name.trim() !== ""
@@ -59,9 +70,19 @@ function formatStars(stars) {
 }
 
 function renderRepositories(repositories) {
-  repositoryCount.textContent = `${repositories.length} repositories`;
-  repositoryStatus.textContent = "";
-  repositoryStatus.hidden = true;
+  if (!repositoryList) {
+    return;
+  }
+
+  if (repositoryCount) {
+    repositoryCount.textContent = `${repositories.length} repositories`;
+  }
+
+  if (repositoryStatus) {
+    repositoryStatus.textContent = "";
+    repositoryStatus.hidden = true;
+  }
+
   repositoryList.replaceChildren();
 
   if (repositories.length === 0) {
@@ -96,6 +117,10 @@ function renderRepositories(repositories) {
 }
 
 function showStatus(message) {
+  if (!repositoryStatus) {
+    return;
+  }
+
   repositoryStatus.textContent = message;
   repositoryStatus.hidden = false;
 }
@@ -115,11 +140,22 @@ async function loadRepositories() {
     const repositories = validateRepositories(data);
     renderRepositories(repositories);
   } catch (error) {
-    repositoryCount.textContent = "";
-    repositoryList.replaceChildren();
+    if (repositoryCount) {
+      repositoryCount.textContent = "";
+    }
+
+    if (repositoryList) {
+      repositoryList.replaceChildren();
+    }
+
     showStatus("Could not load starred repositories.");
     console.error(error);
   }
 }
 
-loadRepositories();
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", loadRepositories);
+} else {
+  loadRepositories();
+}
+

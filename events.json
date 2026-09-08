@@ -1,34 +1,50 @@
-[
-  {
-    "name": "github/docs",
-    "description": "The open-source repository for GitHub's documentation.",
-    "url": "https://github.com/github/docs",
-    "language": "JavaScript",
-    "stars": 16000,
-    "starredAt": "2026-08-28"
-  },
-  {
-    "name": "microsoft/TypeScript",
-    "description": "The TypeScript programming language.",
-    "url": "https://github.com/microsoft/TypeScript",
-    "language": "TypeScript",
-    "stars": 105000,
-    "starredAt": "2026-08-19"
-  },
-  {
-    "name": "vercel/next.js",
-    "description": "The React framework for the web.",
-    "url": "https://github.com/vercel/next.js",
-    "language": "JavaScript",
-    "stars": 135000,
-    "starredAt": "2026-08-07"
-  },
-  {
-    "name": "astral-sh/ruff",
-    "description": "An extremely fast Python linter and code formatter.",
-    "url": "https://github.com/astral-sh/ruff",
-    "language": "Rust",
-    "stars": 42000,
-    "starredAt": "2026-07-30"
-  }
-]
+{
+  "repositories": [
+    {
+      "id": 1,
+      "name": "awesome-python",
+      "url": "https://github.com/vinta/awesome-python",
+      "description": "A curated list of awesome Python frameworks, libraries, software and resources",
+      "language": "Python",
+      "stars": 207000,
+      "starredAt": "2026-09-01T10:30:00Z"
+    },
+    {
+      "id": 2,
+      "name": "tensorflow",
+      "url": "https://github.com/tensorflow/tensorflow",
+      "description": "An Open Source Machine Learning Framework for Everyone",
+      "language": "C++",
+      "stars": 185000,
+      "starredAt": "2026-08-28T14:15:00Z"
+    },
+    {
+      "id": 3,
+      "name": "vue",
+      "url": "https://github.com/vuejs/vue",
+      "description": "The Progressive JavaScript Framework",
+      "language": "JavaScript",
+      "stars": 208000,
+      "starredAt": "2026-08-25T09:45:00Z"
+    },
+    {
+      "id": 4,
+      "name": "react",
+      "url": "https://github.com/facebook/react",
+      "description": "A JavaScript library for building user interfaces with React",
+      "language": "JavaScript",
+      "stars": 225000,
+      "starredAt": "2026-08-20T16:20:00Z"
+    },
+    {
+      "id": 5,
+      "name": "kubernetes",
+      "url": "https://github.com/kubernetes/kubernetes",
+      "description": "Production-Grade Container Orchestration",
+      "language": "Go",
+      "stars": 109000,
+      "starredAt": "2026-08-15T11:00:00Z"
+    }
+  ]
+}
+
