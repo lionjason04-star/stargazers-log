@@ -2,10 +2,64 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Stargazers log</title>
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <h1>Stargazers log</h1>
-    <p>A log of the repositories I've starred.</p>
+    <main class="page-shell">
+      <header class="page-header">
+        <p class="eyebrow">Open source bookmarks</p>
+        <h1>Stargazers log</h1>
+        <p>A log of the repositories I've starred.</p>
+      </header>
+
+      <section aria-labelledby="repositories-heading">
+        <div class="section-heading">
+          <h2 id="repositories-heading">Starred repositories</h2>
+          <span id="repository-count" class="repository-count" aria-live="polite"></span>
+        </div>
+        <p id="repository-status" class="status-message" role="status" aria-live="polite">Loading repositories...</p>
+        <ul id="repository-list" class="repository-list"></ul>
+      </section>
+    </main>
+
+    <script id="repository-fallback" type="application/json">
+      [
+        {
+          "name": "github/docs",
+          "description": "The open-source repository for GitHub's documentation.",
+          "url": "https://github.com/github/docs",
+          "language": "JavaScript",
+          "stars": 16000,
+          "starredAt": "2026-08-28"
+        },
+        {
+          "name": "microsoft/TypeScript",
+          "description": "The TypeScript programming language.",
+          "url": "https://github.com/microsoft/TypeScript",
+          "language": "TypeScript",
+          "stars": 105000,
+          "starredAt": "2026-08-19"
+        },
+        {
+          "name": "vercel/next.js",
+          "description": "The React framework for the web.",
+          "url": "https://github.com/vercel/next.js",
+          "language": "JavaScript",
+          "stars": 135000,
+          "starredAt": "2026-08-07"
+        },
+        {
+          "name": "astral-sh/ruff",
+          "description": "An extremely fast Python linter and code formatter.",
+          "url": "https://github.com/astral-sh/ruff",
+          "language": "Rust",
+          "stars": 42000,
+          "starredAt": "2026-07-30"
+        }
+      ]
+    </script>
+    <script src="script.js" defer></script>
   </body>
 </html>

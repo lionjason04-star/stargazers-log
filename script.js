@@ -1,100 +1,161 @@
-// Fetch and render the starred repositories
-async function loadRepositories() {
-  const container = document.getElementById('repositories-container');
-  
+const repositoryList = document.querySelector("#repository-list");
+const repositoryCount = document.querySelector("#repository-count");
+const repositoryStatus = document.querySelector("#repository-status");
+
+function getFallbackRepositories() {
+  const fallback = document.querySelector("#repository-fallback");
+
+  if (!fallback) {
+    return [];
+  }
+
   try {
-    container.innerHTML = '<div class="loading">Loading starred repositories...</div>';
-    
-    // Fetch the events.json file
-    const response = await fetch('events.json');
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch events.json: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    if (!data.repositories || data.repositories.length === 0) {
-      container.innerHTML = '<div class="error">No starred repositories found.</div>';
-      return;
-    }
-    
-    // Render each repository
-    const repositoriesHTML = data.repositories
-      .map(repo => createRepositoryCard(repo))
-      .join('');
-    
-    container.innerHTML = repositoriesHTML;
+    return JSON.parse(fallback.textContent);
   } catch (error) {
-    console.error('Error loading repositories:', error);
-    container.innerHTML = `
-      <div class="error">
-        Error loading repositories: ${error.message}
-      </div>
-    `;
+    console.error("Unable to parse fallback repositories.", error);
+    return [];
   }
 }
 
-// Create HTML card for a single repository
-function createRepositoryCard(repo) {
-  const starredDate = new Date(repo.starredAt).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
+function normalizeRepositories(data) {
+  if (Array.isArray(data)) {
+    return data;
+  }
+
+  if (data && Array.isArray(data.repositories)) {
+    return data.repositories;
+  }
+
+  return [];
+}
+
+function validateRepositories(data) {
+  const repositories = normalizeRepositories(data);
+
+  return repositories.filter((repository) => {
+    if (!repository || typeof repository !== "object") {
+      return false;
+    }
+
+    let validUrl = false;
+
+    try {
+      const url = new URL(repository.url, window.location.href);
+      validUrl = url.protocol === "https:" && url.hostname === "github.com";
+    } catch {
+      return false;
+    }
+
+    const validDate = !Number.isNaN(new Date(repository.starredAt).getTime());
+
+    return typeof repository.name === "string" && repository.name.trim() !== ""
+      && typeof repository.description === "string"
+      && typeof repository.language === "string"
+      && Number.isFinite(repository.stars) && repository.stars >= 0
+      && validDate && validUrl;
   });
-  
-  const starsFormatted = formatNumber(repo.stars);
-  
-  return `
-    <div class="repo-card">
-      <div class="repo-header">
-        <a href="${repo.url}" class="repo-name" target="_blank" rel="noopener noreferrer">
-          ${escapeHtml(repo.name)}
-        </a>
-        <a href="${repo.url}" class="repo-link" target="_blank" rel="noopener noreferrer">
-          Visit Repository →
-        </a>
-      </div>
-      
-      <p class="repo-description">${escapeHtml(repo.description)}</p>
-      
-      <div class="repo-meta">
-        <div class="meta-item">
-          <span class="language-badge">${escapeHtml(repo.language)}</span>
-        </div>
-        <div class="meta-item">
-          <span class="stars">⭐ ${starsFormatted} stars</span>
-        </div>
-        <div class="meta-item">
-          <span class="starred-date">Starred on ${starredDate}</span>
-        </div>
-      </div>
-    </div>
-  `;
 }
 
-// Format large numbers (e.g., 207000 -> 207K)
-function formatNumber(num) {
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1) + 'M';
+function formatDate(dateString) {
+  return new Intl.DateTimeFormat("en", {
+    dateStyle: "medium",
+  }).format(new Date(dateString));
+}
+
+function formatStars(stars) {
+  return new Intl.NumberFormat("en", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(stars);
+}
+
+function renderRepositories(repositories) {
+  if (!repositoryList) {
+    return;
   }
-  if (num >= 1000) {
-    return (num / 1000).toFixed(0) + 'K';
+
+  if (repositoryCount) {
+    repositoryCount.textContent = `${repositories.length} repositories`;
   }
-  return num.toString();
+
+  if (repositoryStatus) {
+    repositoryStatus.textContent = "";
+    repositoryStatus.hidden = true;
+  }
+
+  repositoryList.replaceChildren();
+
+  if (repositories.length === 0) {
+    showStatus("No starred repositories yet.");
+    return;
+  }
+
+  repositories.forEach((repository) => {
+    const item = document.createElement("li");
+    const article = document.createElement("article");
+    const heading = document.createElement("h3");
+    const link = document.createElement("a");
+    const description = document.createElement("p");
+    const metadata = document.createElement("p");
+
+    item.className = "repository-card";
+    article.className = "repository-card-content";
+    link.href = repository.url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = repository.name;
+    description.className = "repository-description";
+    description.textContent = repository.description;
+    metadata.className = "repository-meta";
+    metadata.textContent = `${repository.language} | ${formatStars(repository.stars)} stars | Starred ${formatDate(repository.starredAt)}`;
+
+    heading.append(link);
+    article.append(heading, description, metadata);
+    item.append(article);
+    repositoryList.append(item);
+  });
 }
 
-// Escape HTML special characters for security
-function escapeHtml(text) {
-  const map = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
-  };
-  return text.replace(/[&<>"']/g, m => map[m]);
+function showStatus(message) {
+  if (!repositoryStatus) {
+    return;
+  }
+
+  repositoryStatus.textContent = message;
+  repositoryStatus.hidden = false;
 }
 
-// Load repositories when the page loads
-document.addEventListener('DOMContentLoaded', loadRepositories);
+async function loadRepositories() {
+  try {
+    const data = window.location.protocol === "file:"
+      ? getFallbackRepositories()
+      : await fetch("events.json").then((response) => {
+        if (!response.ok) {
+          throw new Error(`Unable to load repositories: ${response.status}`);
+        }
+
+        return response.json();
+      });
+
+    const repositories = validateRepositories(data);
+    renderRepositories(repositories);
+  } catch (error) {
+    if (repositoryCount) {
+      repositoryCount.textContent = "";
+    }
+
+    if (repositoryList) {
+      repositoryList.replaceChildren();
+    }
+
+    showStatus("Could not load starred repositories.");
+    console.error(error);
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", loadRepositories);
+} else {
+  loadRepositories();
+}
+
